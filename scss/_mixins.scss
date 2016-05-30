@@ -1,0 +1,406 @@
+@mixin overParent {
+	position: absolute;
+	// width: 100% (and height) doesn't' respect margins
+	top: 0; bottom: 0;
+	left: 0; right: 0;
+}
+@mixin center($width) {
+	width: $width;
+	left: 50%;
+	margin-left: -($width/2);
+}
+@mixin ellipsis {
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+@mixin spriteBackground($width, $height, $spritePositionX, $spritePositionY) {
+	width: ($width/2); height: ($height/2);
+	background: url("../img/sprites2x.png") no-repeat ($spritePositionX/2) ($spritePositionY/2);
+	background-size: (436px/2) auto; // 436px is the total sprite width
+}
+@mixin webkit($propertyName, $value) {
+	$webkitValue: $value;
+	@if type_of($value) == "string" and str-index($value, transform) == 1 {
+		$webkitValue: -webkit- + $value;
+	}
+	#{$propertyName}: #{$value}; // $value can be a string, and we don't want to output the quotes
+	-webkit-#{$propertyName}: #{$webkitValue};
+}
+@mixin transition($propertyName, $animationTime, $easing: ease) {
+	@include webkit(transition, #{$propertyName} #{$animationTime} $easing);
+}
+@mixin transform($value, $addTranslateZ: true) {
+	@if ($addTranslateZ) {
+		@include webkit(transform, #{$value} translateZ(0));
+	} @else {
+		@include webkit(transform, #{$value});
+	}
+}
+@mixin translateX($value, $addTranslateZ: true) {
+	@include transform(translateX($value), $addTranslateZ);
+}
+@mixin translateY($value, $addTranslateZ: true) {
+	@include transform(translateY($value), $addTranslateZ);
+}
+@mixin rotate($value, $addTranslateZ: true) {
+	@include transform(rotateZ($value), $addTranslateZ);
+}
+@mixin transform-origin($x, $y) {
+	@include webkit(transform-origin, #{$x} #{$y});
+}
+@mixin disableTransition {
+	-webkit-transition: none;
+	transition: none;
+}
+@mixin icon-fill($src, $fill) {
+  $data-uri: data-uri('image/svg+xml;charset=UTF-8', "${src}");
+  $replace-src: replace("@{data-uri}", "fill\%3D\%22\%23[\w]{3,6}\%22", escape('fill="${fill}"'), "g");
+  background-image:e($replace-src);
+}
+@mixin disableOverlay($animationTime) {
+	// we want to avoid display: none
+	opacity: 0;
+	z-index: -1;
+	
+	// doesn't work with webkit mixin
+	-webkit-transition: all $animationTime ease-in-out, z-index $animationTime step-end;
+	transition: all $animationTime ease-in-out, z-index $animationTime step-end;
+	&.visible {
+		-webkit-transition: all $animationTime ease-in-out, z-index $animationTime step-start;
+		transition: all $animationTime ease-in-out, z-index $animationTime linear step-start;
+		
+		opacity: 1;
+		z-index: 0;
+	}
+}
+@mixin keyframes($name) {
+	@-webkit-keyframes #{$name} {
+		@content; 
+	}
+	@keyframes #{$name} {
+		@content;
+	}
+}
+@mixin forceGPU {
+	@include webkit(transform, translateZ(0));
+	@include webkit(backface-visibility, hidden);
+	@include webkit(perspective, 1000px);
+}
+
+//----------------------- flex containers -----------------------//
+@mixin flexColumn($alignment: stretch, $justifyContent: null) {
+	@include flexContainer(column, $alignment, $justifyContent);
+}
+@mixin flexColumnReverse($alignment: stretch, $justifyContent: null) {
+	@include flexContainer(column-reverse, $alignment, $justifyContent);
+}
+@mixin flexRow($alignment: stretch, $justifyContent: null) {
+	@include flexContainer(row, $alignment, $justifyContent);
+}
+@mixin flexRowReverse($alignment: stretch, $justifyContent: null) {
+	@include flexContainer(row-reverse, $alignment, $justifyContent);
+}
+@mixin flexContainer($direction, $alignment: null, $justifyContent: null) {
+	display: -webkit-flex;
+	display: flex;
+	@include webkit(flex-direction, $direction);
+	@include webkit(align-items, $alignment);
+	@if ($justifyContent) {
+		@include webkit(justify-content, $justifyContent);
+	}
+}
+
+@mixin centerSingleChild {
+	@include flexColumn(center, center);
+}
+@mixin tabContentTopLine {
+	box-shadow: 0px 1px 1px 0px #e3e3e3; // we put e3e3e3 to get e8e8e8
+}
+
+@mixin materialCard {
+	//box-shadow: 0px 0px 6px -2px grey;
+	@include boxShadow(1);
+	margin: 8px;
+	background-color: white;
+	border-radius: 3px;
+}
+@mixin materialCardMobileAddon {
+    border-radius: 2px;
+    margin: 8px;
+	padding: 5px;
+}
+@mixin materialButton {
+	@include boxShadow(1);
+	color: white;
+	border-radius: 3px;
+	//margin: auto;
+	text-transform: uppercase;
+	@include centerSingleChild;
+	
+	background-color: $buttonColor;
+	&.pressed {
+		background-color: $lightButtonColor;
+	}
+}
+
+// taken from https://medium.com/@Florian/freebie-google-material-design-shadow-helper-2a0501295a2d
+@mixin boxShadow($level: 1){
+    @if ($level == 1) {
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    } @else if ($level == 2) {
+        box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+    } @else if ($level == 3) {
+        box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+    } @else if ($level == 4) {
+        box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+    } @else if ($level == 5) {
+        box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
+    }
+}
+
+@mixin materialHeader {
+	background-color: white;
+	box-shadow: 0 0px 8px rgba(0, 0, 0, 0.19);
+}
+
+/*-----------------------------------------------------------*/
+/*------------------- advertiser(s) button ------------------*/
+/*-----------------------------------------------------------*/
+// note: don't confuse with the advertisersButton that's in the filters button bar
+@mixin advertisersGoButton($arrowButtonWidth, $width, $widthWhenOpen, $height, $openOnRight) {
+	position: relative; // so that we don't have to do it in js and cause a reflow
+	width: $width; height: $height;
+	.button { // the top part
+		@include overParent;
+		.arrowContainer {
+			@include overParent;
+			@include materialButton;
+			z-index: 0; // seems necessary (sometimes)
+			.arrow {
+				position: absolute;
+				width: $arrowButtonWidth; height: 100%;
+				top: 0; right: 0;
+				border-left: 1px solid #9DD1FA;
+				@include centerSingleChild;
+				.arrowPicto {
+					width: 0;
+					height: 0;
+					border-left: 4px solid transparent;
+					border-right: 4px solid transparent;
+					border-top: 4px solid white;
+					margin: 0 $arrowButtonWidth / 2;
+					@include transition(transform, 200ms);
+					@include transform(rotateZ(0deg));
+				}
+			}
+			@if $openOnRight {
+				@include transition(transform, 200ms);
+				@include translateX(0); // for the translateZ(0)
+			}
+		}
+		.contentAndShadow { // here only for the padding and background (for the shadow)
+			position: absolute;
+			left: 0; right: 0; // see below if .withArrow
+			top: 0; bottom: -3px;
+			padding-bottom: 3px;
+			background-color: white;
+			z-index: 1; // goes with .arrowContainer's z-index (webkit bug ?)
+			overflow: hidden; // to hide the right part of .content's shadow
+			@include flexRow();
+			.content {
+				@include webkit(flex, 1);
+				@include materialButton;
+				font-size: 16px;
+				line-height: normal; // no clipping
+				text-align: center;
+				@include flexColumn(center, center);
+			}
+			@if $openOnRight == false {
+				@include transition(transform, 200ms);
+				@include translateX(0); // for the translateZ(0)
+			}
+		}
+		&.withArrow {
+			.contentAndShadow { right: $arrowButtonWidth; }
+			.content {
+				margin-right: -1px; // otherwise the shadow is 1-pixel-too-short on the right (why?)
+				border-top-right-radius: 0;
+				border-bottom-right-radius: 0;
+			}
+		}
+		&.open {
+			@if $openOnRight {
+				.arrowContainer {
+					@include translateX($widthWhenOpen - $width);
+				}
+			} @else {
+				.contentAndShadow {
+					@include translateX(-($widthWhenOpen - $width - 1)); // - 1 otherwise we see a white line
+				}
+			}
+			.arrowContainer .arrow .arrowPicto {
+				@include transform(rotateZ(180deg));
+			}
+		}
+	}
+	
+	$securityOverlay: 4px; // it has 2 purposes: it hides  border-radius and shows the shadow
+	.advertiserListMask {
+		position: absolute;
+		top: 100%; margin-top: -2px; // not $securityOverlay (2 is enough))
+		z-index: 100; // because of .contentAndShadow's z-index (in case it hides the following result's button)
+		@if $openOnRight {
+			left: -$securityOverlay;
+		} @else {
+			right: -$securityOverlay;
+		}
+		width: $widthWhenOpen + 2 * $securityOverlay;
+		height: 0;
+		&.open {
+			height: auto;
+			padding: $securityOverlay; // see comment above
+			padding-top: 0;
+		}
+		overflow: hidden;
+		.advertiserList {
+			width: 100%;
+			@include webkit(flex, 1);
+			@include boxShadow(1);
+			background-color: white;
+			color: $darkFontColor;
+			// there's no need to hide the top shadow
+			border-bottom-left-radius: 3px;
+			border-bottom-right-radius: 3px;
+			//@include flexColumn(stretch);
+			padding: 10px;
+			z-index: 1;
+			font-size: 17px;
+			text-transform: none;
+			@include transition(transform, 200ms);
+			@include translateY(-100%);
+			&.open { @include translateY(0); }
+			.advertiserAndPrice {
+				width: 100%; height: 28px;
+				&.pressed { background-color: $pressedOnWhite; }
+				@include flexRow(center, flex-end);
+				.advertiserName {
+					@include webkit(flex, 1);
+					text-align: left;
+					@include ellipsis;
+					line-height: 24px; // or it's cut ni the bottom
+				}
+				.advertiserArrow {
+					width: 0;
+					height: 0;
+					border-top: 4px solid transparent;
+					border-bottom: 4px solid transparent;
+					border-left: 4px solid $darkFontColor;
+					margin-left: 10px; // on the right, there's already the padding
+				}
+			}
+		}
+	}
+}
+
+@import "_variables";
+////////////////////////////////////
+// mixins specifique pour ce site //
+////////////////////////////////////
+
+
+@mixin small-mobil-device {
+    @media (max-width: #{$mobil-width - 1px}) {
+        @content;
+    }
+}
+
+@mixin mobil-device {
+    @media (min-width: #{$mobil-width}) and (max-width: #{$tablet-width - 1px}) {
+        @content;
+    }
+}
+
+@mixin tablet-device {
+    @media (min-width: #{$tablet-width}) and (max-width: #{$desktop-width - 1px}) {
+        @content;
+    }
+}
+
+@mixin desktop-device {
+    @media (min-width: #{$desktop-width}) {
+        @content;
+    }
+}
+
+@mixin custom-animation-Y($detail_multiplicator) {
+    opacity: 1;
+    @include translateY(0, true);
+    @include webkit(transition-delay, $detail_multiplicator * $transition_delay_time);
+}
+@mixin custom-animation-X($detail_multiplicator) {
+    opacity: 1;
+    @include translateX(0, true);
+    @include webkit(transition-delay, $detail_multiplicator * $transition_delay_time);
+}
+@mixin custom-rotate-Y($value, $detail_multiplicator) {
+    opacity: 1;
+    /*@include translateX(0, true);*/
+    transform: rotateY( $value );
+    @include webkit(transition-delay, $detail_multiplicator * $transition_delay_time);
+}
+@mixin custom-rotate-X($value, $detail_multiplicator) {
+    opacity: 1;
+    /*@include translateX(0, true);*/
+    transform: rotateX( $value );
+    @include webkit(transition-delay, $detail_multiplicator * $transition_delay_time);
+}
+@mixin opacity-delay($detail_multiplicator) {
+    opacity: 1;
+    @include webkit(transition-delay, $detail_multiplicator * $transition_delay_time);
+}
+
+@mixin init-translate-animation($value, $transition_duration, $translationType: Y, $with_translateZ : true) {
+    @if type_of($translationType) == "string" and $translationType == Y {
+        @include translateY($value, $with_translateZ);
+    }
+    @else if type_of($translationType) == "string" and $translationType == X {
+        @include translateX($value, $with_translateZ);
+    }
+    opacity: 0;
+    @include transition(all, $transition_duration);
+}
+
+@mixin rotateX($value, $addTranslateZ: true) {
+    @include transform(rotateX($value), $addTranslateZ);
+    /*@include rotate($value, $addTranslateZ);*/
+}
+@mixin rotateY($value, $addTranslateZ: true) {
+    @include transform(rotateY($value), $addTranslateZ);
+    /*@include rotate($value, $addTranslateZ);*/
+}
+
+@mixin init-rotate-animation($value, $transition_duration, $translationType: Y, $with_translateZ : true) {
+    @if type_of($translationType) == "string" and $translationType == Y {
+        @include rotateY($value, $with_translateZ);
+    }
+    @else if type_of($translationType) == "string" and $translationType == X {
+        @include rotateX($value, $with_translateZ);
+    }
+    opacity: 0;
+    @include transition(all, $transition_duration);
+}
+
+@mixin init-animate-background($background_size: 100% 100%, $background_origine : left top, $background_repeat : no-repeat, $background_position: 0 0) {
+    background: none;
+    background-repeat: $background_repeat;
+    background-size: $background_size;
+    background-origin: $background_origine;
+    background-position: $background_position;
+}
+
+@mixin animate-background($detail_multiplicator, $transition_duration, $background_position: 0 0) {
+    @include transition(background, $transition_duration);
+    @include opacity-delay($detail_multiplicator);
+    background-position: $background_position;
+}

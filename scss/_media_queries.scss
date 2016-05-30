@@ -1,0 +1,48 @@
+@import "_variables";
+
+@mixin small-screen {
+    body {
+        width: 100% !important;
+        overflow-x: hidden !important;
+        .container, .large-container {
+            width: 90% !important;
+            margin: 0 auto;
+            text-align: left;
+        }
+        [class*="grid-"] > div, [class*="grid-"] div.box  {
+            width: 100%;
+            margin: 0 auto;
+            text-align: left;
+        }
+    }
+}
+
+@include small-mobil-device {
+    @include small-screen;
+    body {
+        width: 100% !important;
+        .box {
+            width: 100% !important;
+        }
+        img {
+            max-width: 100%;
+        }
+    }
+}
+
+@include mobil-device {
+    @include small-screen;
+    // body {
+    //     .box {
+    //         width: 100% !important;
+    //         img {
+    //             max-width: 100% !important;
+    //         }
+    //     }
+    // }
+}
+@include tablet-device {
+    @include small-screen;
+}
+@include desktop-device {
+}

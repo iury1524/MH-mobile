@@ -1,0 +1,32 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Myhuissier</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script>
+    Storage.prototype.setArray = function(key, obj) {
+      return this.setItem(key, JSON.stringify(obj))
+    }
+    Storage.prototype.getArray = function(key) {
+        return JSON.parse(this.getItem(key))
+    }
+      // (function(d, s, id){
+      //   var js, fjs = d.getElementsByTagName(s)[0];
+      //   if (d.getElementById(id)) {return;}
+      //   js = d.createElement(s); js.id = id;
+      //   js.src = "https://connect.facebook.net/en_US/sdk.js";
+      //   fjs.parentNode.insertBefore(js, fjs);
+      // }(document, 'script', 'facebook-jssdk'));
+    </script>
+</head>
+
+<body>
+  <div id="reactEntryPoint"></div>
+  <script src="app.js"></script>
+
+</body>
+</html>
