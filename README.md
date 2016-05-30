@@ -11,7 +11,7 @@ npm run dev-server
 ```
 http://localhost:3000
 
-## Mise en place du build
+## Building app
 ```sh
 npm run build
 ```
